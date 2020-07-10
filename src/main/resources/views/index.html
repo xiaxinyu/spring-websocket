@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket</title>
+
+</head>
+<body>
+<h1>Hello, WebSocket</h1>
+<p>
+    <input type="text" width="10%" id="message" /> &nbsp;&nbsp; &nbsp;
+    <button type="button" name="Send" value="Send" onclick="sendMessage()">Send</button>
+</p>
+
+<p>
+    <h3>Message Box：</h3>
+    <textarea id="messageBox" rows="20" cols="200"></textarea>
+</p>
+
+</body>
+<script src="/static/jquery-3.3.1.js"></script>
+
+<script th:inline="javascript">
+    function sendMessage(){
+        var message = document.getElementById("message");
+        var messageBox = document.getElementById("messageBox");
+
+        var msgText = message.value;
+        messageBox.value = messageBox.value + "Send：" + msgText + "\n";
+
+        var url = "http://localhost:9001/websocket/push/20?message=" + msgText;
+        $.get(url, function(data,status){
+            message.value = "";
+        });
+    }
+
+    function showMessage(message){
+        var messageBox = document.getElementById("messageBox");
+        messageBox.value = messageBox.value + "Receive：" + message + "\n";
+    }
+</script>
+
+<script th:inline="javascript">
+    var socket;
+    if(typeof(WebSocket) == "undefined") {
+        showMessage("您的浏览器不支持WebSocket");
+    }else{
+        console.log("您的浏览器支持WebSocket");
+        	//实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
+            //等同于socket = new WebSocket("ws://localhost:9001/home/websocket/20");
+            //socket = new WebSocket("${basePath}/websocket/[[${cid}]]".replace("http","ws"));
+            socket = new WebSocket("ws://localhost:9001/websocket/20");
+            //打开事件
+            socket.onopen = function() {
+                showMessage("Socket 已打开");
+                socket.send("这是来自客户端的消息" + location.href + new Date());
+            };
+            //获得消息事件
+            socket.onmessage = function(msg) {
+                showMessage(msg.data);
+                //发现消息进入    开始处理前端触发逻辑
+            };
+            //关闭事件
+            socket.onclose = function() {
+                showMessage("Socket已关闭");
+            };
+            //发生了错误事件
+            socket.onerror = function() {
+                showMessage("Socket发生了错误");
+                //此时可以尝试刷新页面
+            }
+    }
+</script>
+</html>

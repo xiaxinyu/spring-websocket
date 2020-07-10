@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: spring-websocket
+  thymeleaf:
+    prefix: classpath:/views/
+    suffix: .html
+    cache: false
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+  mvc:
+      static-path-pattern: /static/**
+
+server:
+  port: 9001

@@ -1,10 +1,12 @@
 package com.xiaxinyu.spring.websocket.controller;
 
 import com.xiaxinyu.spring.websocket.core.ResponseEntity;
+import com.xiaxinyu.spring.websocket.core.WebSocketMessageSender;
 import com.xiaxinyu.spring.websocket.core.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.io.IOException;
 
 /**
@@ -20,10 +22,10 @@ public class HomeController {
     @ResponseBody
     public ResponseEntity<String> pushToWeb(@PathVariable String cid, String message) {
         try {
-            WebSocketServer.sendInfo(message, cid);
+            WebSocketMessageSender.sendInfo(message, cid);
         } catch (IOException e) {
             return ResponseEntity.error(cid + "#" + e.getMessage());
         }
-        return  new ResponseEntity<>(cid);
+        return new ResponseEntity<>(cid);
     }
 }

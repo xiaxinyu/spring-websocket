@@ -23,10 +23,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Slf4j
 public class WebSocketServer {
 
-    //与某个客户端的连接会话，需要通过它来给客户端发送数据
+    /**
+     * 与某个客户端的连接会话，需要通过它来给客户端发送数据
+     */
     private Session session;
 
-    //接收sid
+    /**
+     * 接收sid
+     */
     private String sid = "";
 
     /**
@@ -34,6 +38,8 @@ public class WebSocketServer {
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) throws IOException {
+        printThread();
+
         this.session = session;
         this.sid = sid;
         WebSocketManager.addWebSocketServer(sid, this);
@@ -42,7 +48,7 @@ public class WebSocketServer {
         if (!session.isOpen()) {
             throw new RuntimeException(String.format("Session isn't opened: sid=%s, sessionId=%s", sid, session.getId()));
         } else {
-            WebSocketMessageSender.sendMessage(session, "连接成功");
+            WebSocketMessageSender.sendMessage(sid, session, "连接成功");
         }
     }
 
@@ -51,6 +57,8 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose() {
+        printThread();
+
         //从set中删除
         WebSocketManager.removeWebSocketServer(this.sid, this);
         log.info("有一连接关闭！当前在线人数为" + WebSocketManager.getOnlineCount());
@@ -63,27 +71,40 @@ public class WebSocketServer {
      */
     @OnMessage
     public void onMessage(String message, Session session) throws IOException {
+        printThread();
         log.info("收到消息来自窗口: sid={}, message={}, sessionId={}", this.sid, message, session.getId());
 
         CopyOnWriteArraySet<WebSocketServer> webSocketSet = WebSocketManager.getWebSocketServer(this.sid);
 
         if (Objects.isNull(webSocketSet) || webSocketSet.isEmpty()) {
-            WebSocketMessageSender.sendMessage(session, String.format("未找到可用的连接通道： sid=%s", this.sid));
+            WebSocketMessageSender.sendMessage(this.sid, session, String.format("未找到可用的连接通道： sid=%s", this.sid));
             return;
         }
 
         //群发消息
         for (WebSocketServer item : webSocketSet) {
-            WebSocketMessageSender.sendMessage(item.session, message);
+            WebSocketMessageSender.sendMessage(this.sid, item.session, message);
         }
     }
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("发生错误: sessionId={}", session.getId(), error);
+        printThread();
+
+        log.error("发生错误: sid={}, sessionId={}", this.sid, session.getId(), error);
     }
 
     public Session getSession() {
         return session;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    private void printThread() {
+        Thread thread = Thread.currentThread();
+        ThreadGroup threadGroup = thread.getThreadGroup();
+        log.info("=================[thread={},threadGroup={},threadActiveInGroup={}]==================", thread.getName(), threadGroup.getName(), threadGroup.activeCount());
     }
 }

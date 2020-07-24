@@ -21,6 +21,15 @@
 <script src="/static/jquery-3.3.1.js"></script>
 
 <script th:inline="javascript">
+function getSid(){
+    var url = location.href;
+    var temp2 = url.split('?')[1];
+    var params = new URLSearchParams('?'+temp2);
+    var sid = params.get("sid");
+    console.info("sid=" + sid);
+    return sid;
+}
+
 function sendMessage(){
     var message = document.getElementById("message");
     var messageBox = document.getElementById("messageBox");
@@ -28,7 +37,7 @@ function sendMessage(){
     var msgText = message.value;
     messageBox.value = messageBox.value + "Send：" + msgText + "\n";
 
-    var url = "http://localhost:9001/websocket/push/20?message=" + msgText;
+    var url = "http://localhost:9001/websocket/push/" + getSid() + "?message=" + msgText;
     $.get(url, function(data,status){
         message.value = "";
     });
@@ -84,8 +93,9 @@ var heartCheck = {
     }
 }
 
+
 function reconnect(){
-    socket = new WebSocket("ws://localhost:9001/websocket/20");
+    socket = new WebSocket("ws://localhost:9001/websocket/" + getSid());
 }
 
 if(typeof(WebSocket) == "undefined") {
@@ -93,7 +103,7 @@ if(typeof(WebSocket) == "undefined") {
 }else{
     console.log("您的浏览器支持WebSocket");
 
-    socket = new WebSocket("ws://localhost:9001/websocket/20");
+    socket = new WebSocket("ws://localhost:9001/websocket/" + getSid());
 
     //打开事件
     socket.onopen = function() {

@@ -18,14 +18,14 @@ import java.io.IOException;
 @Controller
 @Slf4j
 public class HomeController {
-    @RequestMapping("/websocket/push/{cid}")
+    @RequestMapping(value = "/websocket/push/{sid}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<String> pushToWeb(@PathVariable String cid, String message) {
+    public ResponseEntity<String> pushToWeb(@PathVariable String sid, String message) {
         try {
-            WebSocketMessageSender.sendInfo(message, cid);
+            WebSocketMessageSender.sendInfo(message, sid);
         } catch (IOException e) {
-            return ResponseEntity.error(cid + "#" + e.getMessage());
+            return ResponseEntity.error(sid + "#" + e.getMessage());
         }
-        return new ResponseEntity<>(cid);
+        return new ResponseEntity<>(sid);
     }
 }

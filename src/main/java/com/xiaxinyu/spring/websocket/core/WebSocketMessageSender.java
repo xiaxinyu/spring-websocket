@@ -23,21 +23,23 @@ public class WebSocketMessageSender {
 
         if (Objects.nonNull(webSocketSet) && !webSocketSet.isEmpty()) {
             for (WebSocketServer item : webSocketSet) {
-                sendMessage(item.getSession(), message);
+                sendMessage(item.getSid(), item.getSession(), message);
             }
+        } else {
+            throw new RuntimeException(String.format("Can't find available channel: sid=%s", sid));
         }
     }
 
     /**
      * 实现服务器主动推送
      */
-    public static void sendMessage(Session session, String message) throws IOException {
+    public static void sendMessage(String sid, Session session, String message) throws IOException {
         log.info("session.getBasicRemote()=={}, sessionId={}", session.getBasicRemote(), session.getId());
         synchronized (session) {
             if (message.equals("Ping")) {
-                session.getBasicRemote().sendText(String.format("Pong  sid=%s", session.getId()));
+                session.getBasicRemote().sendText(String.format("Pong  sid=%s  sessionId=%s", sid, session.getId()));
             } else {
-                session.getBasicRemote().sendText(String.format("%s  sid=%s", message, session.getId()));
+                session.getBasicRemote().sendText(String.format("%s  sid=%s  sessionId=%s", message, sid, session.getId()));
             }
         }
     }

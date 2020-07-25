@@ -14,7 +14,7 @@
 
 <p>
     <h3>Message Box：</h3>
-    <textarea id="messageBox" rows="20" cols="200"></textarea>
+    <textarea id="messageBox" rows="50" cols="200"></textarea>
 </p>
 
 </body>
@@ -28,6 +28,15 @@ function getSid(){
     var sid = params.get("sid");
     console.info("sid=" + sid);
     return sid;
+}
+
+function getType(){
+    var url = location.href;
+    var temp2 = url.split('?')[1];
+    var params = new URLSearchParams('?'+temp2);
+    var type = params.get("type");
+    console.info("type=" + type);
+    return type;
 }
 
 function sendMessage(){
@@ -81,12 +90,12 @@ var heartCheck = {
     timeout: 10000, //10m
     timeoutObj: null,
     reset: function(){
-        clearTimeout(this.timeoutObj);　　　　
+        clearTimeout(this.timeoutObj);
         this.start();
     },
     start: function(){
         this.timeoutObj = setTimeout(function(){
-            var ping = "Ping";
+            var ping = "Ping " + getType();
             showMessage("Send：" + ping);
             socket.send(ping);
         }, this.timeout)

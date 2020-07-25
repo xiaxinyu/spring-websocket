@@ -36,7 +36,7 @@ public class WebSocketMessageSender {
     public static void sendMessage(String sid, Session session, String message) throws IOException {
         log.info("session.getBasicRemote()=={}, sessionId={}", session.getBasicRemote(), session.getId());
         synchronized (session) {
-            if (message.equals("Ping")) {
+            if (message.startsWith("Ping")) {
                 session.getBasicRemote().sendText(String.format("Pong  sid=%s  sessionId=%s", sid, session.getId()));
             } else {
                 session.getBasicRemote().sendText(String.format("%s  sid=%s  sessionId=%s", message, sid, session.getId()));
